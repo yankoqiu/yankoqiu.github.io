@@ -242,10 +242,20 @@
                     'light': '/themes/light.css'
                 };
 
+                const originalSetItem = localStorage.setItem;
+
+                localStorage.setItem = function(key, value) {
+                    const event = new Event('itemInserted');
+                    event.key = key;
+                    event.value = value;
+                    document.dispatchEvent(event);
+                    originalSetItem.apply(this, arguments);
+                };
+
                 console.log('Lister run ...');
                 console.log('Window', window);
 
-                window.addEventListener("storage", () => {
+                window.addEventListener("itemInserted", () => {
                     const theme = window.localStorage.getItem("user-color-scheme");
                     const iframe = document.getElementsByClassName('giscus-frame');
                     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
@@ -254,7 +264,7 @@
                     console.log('Iframe:', iframe);
 
                     linkEl.setAttribute('href', ThemeMapToPathMap[theme]);
-                });
+                }, false);
             };
 
             console.log('Theme:', scriptEl.getAttribute('data-theme'));
