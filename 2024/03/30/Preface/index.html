@@ -246,16 +246,13 @@
 
                 localStorage.setItem = function(key, value) {
                     const event = new Event('itemInserted');
-                    console.log('setItem...');
                     event.key = key;
                     event.value = value;
                     document.dispatchEvent(event);
                     originalSetItem.apply(this, arguments);
                 };
 
-                console.log('Lister run ...');
-
-                window.addEventListener("itemInserted", () => {
+                document.addEventListener("itemInserted", () => {
                     const theme = window.localStorage.getItem("user-color-scheme");
                     const iframe = document.getElementsByClassName('giscus-frame');
                     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
