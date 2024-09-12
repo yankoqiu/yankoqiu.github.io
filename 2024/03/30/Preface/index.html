@@ -238,7 +238,7 @@
              * @description 载入评论组件
              */
             function loadCommentComponent() {
-                // 移除旧评论组件
+                // 清空评论组件容器
                 while (containerEl.firstChild) {
                     containerEl.removeChild(containerEl.firstChild);
                 }
@@ -246,8 +246,8 @@
                 const scriptEl = createGiscusScript();
 
                 if (THEME_AUTO_KEY === scriptEl.getAttribute('data-theme')) {
-                    const isLight = window.matchMedia("(prefers-color-scheme: light)").matches;
-                    const theme = localStorage.getItem(THEME_SCHEME_CACHE_KEY) || (isLight ? 'light' : 'dark');
+                    const isDark = window.matchMedia("(prefers-color-scheme: dark)")?.matches;
+                    const theme = localStorage.getItem(THEME_SCHEME_CACHE_KEY) || (isDark ? 'dark' : 'light');
                     scriptEl.setAttribute('data-theme', theme);
                 }
 
