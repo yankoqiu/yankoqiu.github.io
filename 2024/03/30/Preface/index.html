@@ -211,47 +211,73 @@
     
     
     
-    <div id="giscus_container">
+    <div class="comments-container">
+        <div id="giscus_container"></div>
+
         <script>
-            const scriptEl = document.createElement('script');
-            const parenEl = document.getElementById('giscus_container');
-            const themeConfig = 'auto';
-            const themeDefault = window.localStorage.getItem("user-color-scheme") || 'light';
+            const THEME_AUTO_KEY = 'auto';
+            const THEME_SCHEME_CACHE_KEY = 'user-color-scheme';
+            const containerEl = document.getElementById('giscus_container');
 
-            scriptEl.setAttribute('src', 'https://giscus.app/client.js');
-            scriptEl.setAttribute('data-repo', 'YankoQiu/yankoqiu.github.io');
-            scriptEl.setAttribute('data-repo-id', 'R_kgDOMuHdAw');
-            scriptEl.setAttribute('data-category', 'Announcements');
-            scriptEl.setAttribute('data-category-id', 'DIC_kwDOMuHdA84CiVzy');
-            scriptEl.setAttribute('data-mapping', 'pathname');
-            scriptEl.setAttribute('data-strict', '1');
-            scriptEl.setAttribute('data-reactions-enabled', '1');
-            scriptEl.setAttribute('data-emit-metadata', '0');
-            scriptEl.setAttribute('data-input-position', 'top');
-            scriptEl.setAttribute('data-theme', themeConfig === 'auto' ? themeDefault : themeConfig );
-            scriptEl.setAttribute('data-lang', 'zh-CN');
-            scriptEl.setAttribute('data-loading', 'lazy');
-            scriptEl.setAttribute('crossorigin', 'anonymous');
-            scriptEl.setAttribute('async', '');
-
-            parenEl.append(scriptEl);
-
-            if (themeConfig === 'auto') {
+            // 如果是theme：auto，则监听user-color-scheme变更用以动态调整评论组件主题
+            if (THEME_AUTO_KEY === 'auto') {
                 const originalSetItem = localStorage.setItem;
 
                 localStorage.setItem = function(key, value) {
-                    if (key === 'user-color-scheme') {
-                        const theme = window.localStorage.getItem("user-color-scheme") || 'light';
-                        const iframe = document.getElementsByClassName('giscus-frame');
-                        console.log('Iframe:', iframe);
-                        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-                        const linkEl = iframeDoc.getElementById('giscus-theme');
-                        console.log('IframeDoc:', iframeDoc);
+                    originalSetItem.apply(this, [key, value]);
 
-                        linkEl.setAttribute('href', { 'dark': '/themes/dark.css', 'light': '/themes/light.css'}[theme]);
+                    if (THEME_SCHEME_CACHE_KEY === key) {
+                        loadCommentComponent();
                     }
-                    originalSetItem.apply(this, arguments);
                 };
+            }
+
+            loadCommentComponent();
+
+            /**
+             * @description 载入评论组件
+             */
+            function loadCommentComponent() {
+                // 移除旧评论组件
+                while (containerEl.firstChild) {
+                    containerEl.removeChild(containerEl.firstChild);
+                }
+
+                const scriptEl = createGiscusScript();
+
+                if (THEME_AUTO_KEY === scriptEl.getAttribute('data-theme')) {
+                    const isLight = window.matchMedia("(prefers-color-scheme: light)").matches;
+                    const theme = localStorage.getItem(THEME_SCHEME_CACHE_KEY) || (isLight ? 'light' : 'dark');
+                    scriptEl.setAttribute('data-theme', theme);
+                }
+
+                containerEl.append(scriptEl);
+            }
+
+            /**
+             * @description 创建Giscus评论组件Script
+             * @returns {HTMLScriptElement}
+             */
+            function createGiscusScript() {
+                const scriptEl = document.createElement('script');
+
+                scriptEl.setAttribute('src', 'https://giscus.app/client.js');
+                scriptEl.setAttribute('data-repo', 'YankoQiu/yankoqiu.github.io');
+                scriptEl.setAttribute('data-repo-id', 'R_kgDOMuHdAw');
+                scriptEl.setAttribute('data-category', 'Announcements');
+                scriptEl.setAttribute('data-category-id', 'DIC_kwDOMuHdA84CiVzy');
+                scriptEl.setAttribute('data-mapping', 'pathname');
+                scriptEl.setAttribute('data-strict', '1');
+                scriptEl.setAttribute('data-reactions-enabled', '1');
+                scriptEl.setAttribute('data-emit-metadata', '0');
+                scriptEl.setAttribute('data-input-position', 'top');
+                scriptEl.setAttribute('data-theme', 'auto' );
+                scriptEl.setAttribute('data-lang', 'zh-CN');
+                scriptEl.setAttribute('data-loading', 'lazy');
+                scriptEl.setAttribute('crossorigin', 'anonymous');
+                scriptEl.setAttribute('async', '');
+
+                return scriptEl;
             }
         </script>
     </div>
